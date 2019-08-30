@@ -5,4 +5,4 @@ Course repository for fall 2019 semester of cs 211
 I'm a student at HSU.
 
 ## Tips
-* Change color in VSC -> CTRL + X, CTRL + T
+* Change color in VSC -> CTRL + X, CTRL + T 
