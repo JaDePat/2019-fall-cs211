@@ -25,21 +25,19 @@ int main(void)
 
 	//FUN STUFF HAPPENS HERE
 
-	mvaddch(0, 0, '@');
-	mvaddch(0, num_cols-1, '@');
-	for (int i = 0; i < num_cols-2; i++)
+	for (int i = 0; i < num_cols; i++)
 	{
 		//top row
-		mvaddch(0, i+1, '#');
+		mvaddch(0, i, 1161);
 
 	}
 	for (int i = 0; i < num_rows; i++)
 	{
 		//left column
-		mvaddch(i+1, 0, '#');
+		mvaddch(i+1, 0, '<');
 
 		//right column
-		mvaddch(i+1, num_cols - 1, '#');
+		mvaddch(i+1, num_cols - 1, '>');
 	}
 	
 	//tells curses to draw
