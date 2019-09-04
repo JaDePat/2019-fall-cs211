@@ -19,31 +19,36 @@ int main(void)
 
 	//turn off key echo
 	noecho();
-	nodelay(main_window, TRUE);
+	//nodelay(main_window, TRUE);
 	keypad(main_window, TRUE);
 	curs_set(0);
 
 	//FUN STUFF HAPPENS HERE
-	for (int i = 0; i < num_cols; i++)
+
+	mvaddch(0, 0, '@');
+	mvaddch(0, num_cols-1, '@');
+	for (int i = 0; i < num_cols-2; i++)
 	{
-		mvaddch(0, i, 178);
-		//mvaddch()
+		//top row
+		mvaddch(0, i+1, '#');
+
 	}
 	for (int i = 0; i < num_rows; i++)
 	{
 		//left column
-		mvaddch(i, 0, 219);
+		mvaddch(i+1, 0, '#');
 
 		//right column
-		mvaddch(i, num_cols - 1, 219);
+		mvaddch(i+1, num_cols - 1, '#');
 	}
+	
 	//tells curses to draw
 	refresh();
 
 	//revert back to normal console mode
 	//nodelay(main_window, TRUE);
 	keypad(main_window, TRUE);
-	mvaddstr(0, 0, "Press any key to continue...");
+	mvaddstr(1, 1, "Press any key to continue...");
 	char result = getch();
 	endwin();
 
