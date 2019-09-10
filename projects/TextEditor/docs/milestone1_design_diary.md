@@ -1,2 +1,4 @@
 # Design Diary
 Use this space to talk about your process.  For inspiration, see [my prompts](../../../docs/sample_reflection.md) 
+
+The biggest issue that I ran into with this first milestone was coding a functioning ENTER key for my text editor. To add characters to the screen I implemented a while loop, in which characters from the keyboard were caught and added to the screen. The ENTER key would move the cursor to a new line but the problem was that the cursor would move into the border, which was at the edge of the screen. Typing anything else at that point would override the border on both the left and right side. My first attempted solution was to create an if statement that would move the cursor when the ENTER key was pressed. However, when the ENTER key was pressed, the x-position in the move function was ignored. The cursor would move to the y-position that I had input but the cursor would always begin at x=0. 
