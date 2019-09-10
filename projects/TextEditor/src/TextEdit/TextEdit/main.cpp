@@ -13,10 +13,13 @@ int main(void)
 	main_window = initscr();
 
 	//take up most of the screen
-	/*getmaxyx(main_window, num_rows, num_cols);
-	resize_term(num_rows - 1, num_cols - 1);
-	getmaxyx(main_window, num_rows, num_cols);*/
+	getmaxyx(main_window, num_rows, num_cols);
+	
+	//creates border 
 	wborder(main_window, 0, 0, 1161, 0, 0, 0, 0, 0);
+
+	//creates new windwo to be typed in
+	WINDOW* sub = newwin(num_rows-3, num_cols-2,2,1);
 
 	//Checks if terminal can handle color. 
 	//Code from linuxjournal.com by Jim Hall
@@ -37,30 +40,42 @@ int main(void)
 
 	//turn off key echo
 	noecho();
-	//nodelay(main_window, TRUE);
-	//keypad(main_window, TRUE);
-	curs_set(TRUE);
 	
-	//tells curses to draw
-	refresh();
+	//displays cursor
+	curs_set(2);
+	
+	//adds message and refreshes screen
+	mvwaddstr(main_window, 1, 1, "Press ESC to quit...");
+	wrefresh(main_window);
 
-	//revert back to normal console mode
-	//nodelay(main_window, TRUE);
-	//keypad(main_window, TRUE);
-	mvaddstr(1, 1, "Press ESC to quit...");
-	move(2, 1);
 	int result = ' ';
+	int y_pos = 2;
 
 	//lets user type in the window
 	while (result != 27)
 	{
-		int result2 = getch();
+		int result2 = wgetch(sub);
+		int y, x;
+		getyx(sub, y, x);
+
+		//moves the cursor down when user gets to the side of the screen
+		if (x == num_cols - 2)
+		{
+			y++;
+			wmove(sub, y, x);
+		}
+
+		//Lets the user backspace and delete characters
 		if (result2 == 8)
 		{
-			printw("\b");
-			printw(" ");
+			wprintw(sub,"\b");
+			wprintw(sub," ");
 		}
-		addch(result2);
+
+		mvwaddch(sub, y, x, result2);
+
+		wrefresh(sub);
+
 		result = result2;
 	}
 
