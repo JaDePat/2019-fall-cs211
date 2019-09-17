@@ -1,9 +1,13 @@
 #define PDC_DLL_BUILD 1
 #include "curses.h"
 #include <string>
+#include <vector>
+#include <iostream>
+#include <fstream>
+
 using namespace std;
 
-int main(void)
+int main(int argc, char* argv[])
 {
 	WINDOW* main_window = nullptr;
 	int num_rows = 0;
@@ -20,6 +24,7 @@ int main(void)
 
 	//creates new windwo to be typed in
 	WINDOW* sub = newwin(num_rows-3, num_cols-2,2,1);
+	keypad(sub, TRUE);
 
 	//Checks if terminal can handle color. 
 	//Code from linuxjournal.com by Jim Hall
@@ -37,9 +42,7 @@ int main(void)
 	mvaddstr(0, 13, "EDIT");
 	attroff(COLOR_PAIR(1));
 
-
-	//turn off key echo
-	noecho();
+	cbreak();
 	
 	//displays cursor
 	curs_set(2);
@@ -48,35 +51,95 @@ int main(void)
 	mvwaddstr(main_window, 1, 1, "Press ESC to quit...");
 	wrefresh(main_window);
 
-	int result = ' ';
-	int y_pos = 2;
+	mvwaddstr(sub, 0, 0, "Type name of file and press enter: ");
+	wrefresh(sub);
+
+	//gets string for file opening
+	char file[80];
+	wgetstr(sub, file);
+
+	//allows user to open and display a file
+	ifstream myfile;
+	myfile.open(file);
+	string file2;
+	if (myfile.is_open())
+	{
+		cout << "Hell yeah!" << endl;
+		while (getline(myfile, file2))
+		{
+			strcpy_s(file, file2.c_str());
+			wprintw(sub, file);
+			wprintw(sub, "\n");
+		}
+	}
+	else
+	{
+		string failOpen = "The file did not open.";
+		strcpy_s(file, failOpen.c_str());
+		wprintw(sub, file);
+	}
+
+	//gets initial character before loop
+	int result = wgetch(sub);
 
 	//lets user type in the window
 	while (result != 27)
 	{
-		int result2 = wgetch(sub);
+		noecho();
+		result = wgetch(sub);
 		int y, x;
 		getyx(sub, y, x);
 
 		//moves the cursor down when user gets to the side of the screen
-		if (x == num_cols - 2)
+		if (x == num_cols-5)
 		{
+			x++;
+			wmove(sub, y, x);
+			wprintw(sub, "->");
 			y++;
+			x = 0;
 			wmove(sub, y, x);
 		}
 
-		//Lets the user backspace and delete characters
-		if (result2 == 8)
+		switch (result)
 		{
-			wprintw(sub,"\b");
-			wprintw(sub," ");
+
+		//Lets the user backspace and delete characters
+		case 8:
+			wprintw(sub, "\b");
+			wprintw(sub, " ");
+			mvwaddch(sub, y, x, result);
+			break;
+
+		//custom enter key
+		case 10:
+			y++;
+			x = 0;
+			wmove(sub, y, x);
+			break;
+
+		//arrow keys
+		case KEY_UP:
+			y--;
+			wmove(sub, y, x);
+			break;
+		case KEY_DOWN:
+			y++;
+			wmove(sub, y, x);
+			break;
+		case KEY_RIGHT:
+			x++;
+			wmove(sub, y, x);
+			break;
+		case KEY_LEFT:
+			x--;
+			wmove(sub, y, x);
+			break;
+		default:
+			mvwaddch(sub, y, x, result);
 		}
 
-		mvwaddch(sub, y, x, result2);
-
 		wrefresh(sub);
-
-		result = result2;
 	}
 
 	endwin();
