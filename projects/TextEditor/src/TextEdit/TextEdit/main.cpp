@@ -12,6 +12,8 @@ int main(int argc, char* argv[])
 	WINDOW* main_window = nullptr;
 	int num_rows = 0;
 	int num_cols = 0;
+	int x1 = 0;
+	int y1 = 0;
 
 	//initialize screen, begin curses mode
 	main_window = initscr();
@@ -54,33 +56,55 @@ int main(int argc, char* argv[])
 	mvwaddstr(sub, 0, 0, "Type name of file and press enter: ");
 	wrefresh(sub);
 
-	//gets string for file opening
-	char file[80];
-	wgetstr(sub, file);
+	//array of character for catching input string
+	char input[80];
+	vector<vector<char>> saver(num_rows);
+	vector<char> char_saver(num_cols);
+	
+	//gets the string for the file name
+	wgetstr(sub, input);
 
 	//allows user to open and display a file
 	ifstream myfile;
-	myfile.open(file);
-	string file2;
+	myfile.open(input);
+	char fileContents;
 	if (myfile.is_open())
 	{
-		cout << "Hell yeah!" << endl;
-		while (getline(myfile, file2))
+		while (myfile.good())
 		{
-			strcpy_s(file, file2.c_str());
-			wprintw(sub, file);
-			wprintw(sub, "\n");
+			myfile.get(fileContents);
+			char_saver.push_back(fileContents);
+			
+			//moves the cursor down when user gets to the side of the screen
+			getyx(sub, y1, x1);
+			if (x1 == num_cols - 5)
+			{
+				x1++;
+				wmove(sub, y1, x1);
+				wprintw(sub, "->");
+				char_saver.push_back(' ');
+				char_saver.push_back('-');
+				char_saver.push_back('>');
+				char_saver.push_back('\n');
+				saver.push_back(char_saver);
+				y1++;
+				x1 = 0;
+				wmove(sub, y1, x1);
+			}
+
+			waddch(sub, fileContents);
 		}
+		myfile.close();
 	}
 	else
 	{
-		string failOpen = "The file did not open.";
-		strcpy_s(file, failOpen.c_str());
-		wprintw(sub, file);
+		string failOpen = "The file did not open or does not exist.";
+		strcpy_s(input, failOpen.c_str());
+		wprintw(sub, input);
 	}
 
 	//gets initial character before loop
-	int result = wgetch(sub);
+	int result = ' ';
 
 	//lets user type in the window
 	while (result != 27)
@@ -89,17 +113,6 @@ int main(int argc, char* argv[])
 		result = wgetch(sub);
 		int y, x;
 		getyx(sub, y, x);
-
-		//moves the cursor down when user gets to the side of the screen
-		if (x == num_cols-5)
-		{
-			x++;
-			wmove(sub, y, x);
-			wprintw(sub, "->");
-			y++;
-			x = 0;
-			wmove(sub, y, x);
-		}
 
 		switch (result)
 		{
@@ -136,6 +149,18 @@ int main(int argc, char* argv[])
 			wmove(sub, y, x);
 			break;
 		default:
+
+			//moves the cursor down when user gets to the side of the screen
+			if (x == num_cols - 5)
+			{
+				x++;
+				wmove(sub, y, x);
+				wprintw(sub, "->");
+				y++;
+				x = 0;
+				wmove(sub, y, x);
+			}
+
 			mvwaddch(sub, y, x, result);
 		}
 

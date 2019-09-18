@@ -1,4 +1,3 @@
-This is the test file.
-Take this line.
-another line.
-and another line.
+This is the test file
+can i output text?
+ffffffffff
