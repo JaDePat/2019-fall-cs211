@@ -9,12 +9,21 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-	//2 args means 2nd arg is file name
-	/*if (argc == 2)
-	{
-		myfile.open(argv[1]);
 
-		if (myfile.is_open() == false)
+	//2 args means 2nd arg is file name
+	//allows user to open file from the command line
+	/*ifstream commandFile;
+	if (argc == 2)
+	{
+		commandFile.open(argv[1]);
+		char contents;
+		while (commandFile.good() == true)
+		{
+			commandFile.get(contents);
+			addch(contents);
+		}
+
+		if (commandFile.is_open() == false)
 		{
 			//create that file for later
 		}
@@ -37,7 +46,9 @@ int main(int argc, char* argv[])
 	wborder(main_window, 0, 0, 1161, 0, 0, 0, 0, 0);
 
 	//creates new windwo to be typed in
-	WINDOW* sub = newwin(num_rows-3, num_cols-2,2,1);
+	int sub_rows = num_rows - 3;
+	int sub_cols = num_cols - 2;
+	WINDOW* sub = newwin(sub_rows, sub_cols,2,1);
 	keypad(sub, TRUE);
 
 	//Checks if terminal can handle color. 
@@ -49,13 +60,12 @@ int main(int argc, char* argv[])
 		exit(1);
 	}
 
-	start_color();
+	/*start_color();
 	init_pair(1, COLOR_BLACK, COLOR_WHITE);
-	init_pair(2, COLOR_RED, COLOR_BLACK);
 	attron(COLOR_PAIR(1));
 	mvaddstr(0, 5, "FILE");
 	mvaddstr(0, 13, "EDIT");
-	attroff(COLOR_PAIR(1));
+	attroff(COLOR_PAIR(1));*/
 
 	cbreak();
 	
@@ -97,8 +107,11 @@ int main(int argc, char* argv[])
 				char_saver.clear();
 			}
 
-			//adds contents of the file to the screen
-			waddch(sub, fileContents);
+			if (char_saver.size() == sub_cols)
+			{
+				saver.push_back(char_saver);
+				char_saver.clear();
+			}
 		}
 
 		//adds the final line into the 2d vector
@@ -114,14 +127,33 @@ int main(int argc, char* argv[])
 		wprintw(sub, input);
 	}
 
-	//printing the stored contents of the file
-	for (int i = 0; i < saver.size(); i++)
+	//adds contents of the file to the screen
+	if (saver.size() > sub_rows)
 	{
-		for (int j = 0; j < saver[i].size(); j++)
+		wmove(sub, 0, 0);
+		int difference = saver.size() - sub_rows - 2;
+		top = difference;
+		for (int i = difference; i < saver.size(); i++)
 		{
-			cout << saver[i][j];
+			for (int j = 0; j < saver[i].size(); j++)
+			{
+				waddch(sub, saver[i][j]);
+			}
+		}
+
+		
+	}
+	else
+	{
+		for (int i = 0; i < saver.size(); i++)
+		{
+			for (int j = 0; j < saver[i].size(); j++)
+			{
+				waddch(sub, saver[i][j]);
+			}
 		}
 	}
+	
 
 	//gets initial character before loop
 	int result = ' ';
@@ -153,25 +185,71 @@ int main(int argc, char* argv[])
 
 		//arrow keys
 		case KEY_UP:
-			y--;
-			wmove(sub, y, x);
-			break;
-		case KEY_DOWN:
-			y++;
-			wmove(sub, y, x);
-			if (y == num_rows - 3)
+			if (saver.size() > sub_rows)
 			{
-				wclear(sub);
-				wmove(sub, 0, 0);
-				for (int i = top; i < saver.size(); i++)
+				y--;
+				wmove(sub, y, x);
+				//allows user to scroll up
+				if (y < 0)
 				{
-					for (int j = 0; j < saver[i].size(); j++)
+					wclear(sub);
+					wmove(sub, 0, 0);
+					int newTop = top - 1;
+					for (int i = newTop; i < (sub_rows + newTop) && i < saver.size(); i++)
 					{
-						waddch(sub, saver[i][j]);
+						for (int j = 0; j < saver[i].size(); j++)
+						{
+							waddch(sub, saver[i][j]);
+						}
+					}
+					wmove(sub, 0, x);
+					top--;
+					if (top < 1)
+					{
+						top++;
 					}
 				}
-				wmove(sub, num_rows - 4, x);
-				top++;
+			}
+			else
+			{
+				y--;
+				wmove(sub, y, x);
+			}
+			break;
+		case KEY_DOWN:
+			if (saver.size() > sub_rows)
+			{
+				y++;
+				wmove(sub, y, x);
+				//allows user to scroll down
+				if (y == sub_rows)
+				{
+					wclear(sub);
+					wmove(sub, 0, 0);
+					int newTop = top + 1;
+					int bottom = sub_rows + newTop;
+					for (int i = newTop; i < bottom && i < saver.size(); i++)
+					{
+						for (int j = 0; j < saver[i].size(); j++)
+						{
+							waddch(sub, saver[i][j]);
+						}
+					}
+					wmove(sub, sub_rows - 1, x);
+					top++;
+
+					//keeps top from increasing past size of vector
+					if (top == saver.size())
+					{
+						top--;
+					}
+
+				}
+			}
+			else
+			{
+				y++;
+				wmove(sub, y, x);
 			}
 			break;
 		case KEY_RIGHT:
@@ -185,7 +263,7 @@ int main(int argc, char* argv[])
 		default:
 
 			//moves the cursor down when user gets to the side of the screen
-			if (x == num_cols - 2)
+			if (x == sub_cols)
 			{
 				waddch(sub, '\n');
 			}
