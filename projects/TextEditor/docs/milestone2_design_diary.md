@@ -10,3 +10,5 @@ The most fun aspect of this project, and this is true for me for all projects, w
 Below is my gif:
 
 projects/TextEditor/docs/images/Text Editor Milestone 2.gif
+
+https://github.com/JaDePat/2019-fall-cs211/blob/master/projects/TextEditor/docs/images/Text%20Editor%20Milestone%202.gif
